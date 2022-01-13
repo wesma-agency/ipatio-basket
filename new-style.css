@@ -1,0 +1,611 @@
+.main-wrapper {
+	display: flex;
+	margin: 0 auto;
+}
+
+@media (min-width: 960px) {
+	.main-wrapper {
+		max-width: 940px;
+	}
+}
+
+@media (min-width: 1280px) {
+	.main-wrapper {
+		max-width: 1240px;
+	}
+}
+
+@media (min-width: 1440px) {
+	.main-wrapper {
+		max-width: 1400px;
+	}
+}
+
+.main-wrapper__content {
+	margin-right: 30px;
+	flex-grow: 1;
+}
+
+.main-wrapper__basket {
+	flex-basis: 270px;
+	max-width: 270px;
+	flex-shrink: 0;
+}
+
+.main-basket {
+	background: #fbf6ee;
+	border-radius: 10px;
+}
+
+body.fixed .main-basket__wrap {
+	top: 170px;
+}
+
+.main-basket__wrap {
+	position: sticky;
+	top: 20px;
+}
+
+.main-basket__result {
+}
+
+.result-basket {
+	padding: 30px;
+}
+
+.order-basket {
+	background: #e8e8e6;
+	overflow: hidden;
+	padding: 30px;
+}
+
+.result-basket__title {
+	margin-bottom: 40px;
+	font-size: 20px;
+	line-height: 160%;
+	color: #000000;
+}
+
+.result-basket__list {
+	margin-bottom: 20px;
+}
+
+.result-basket__item {
+}
+
+.result-basket__promocode {
+	margin-bottom: 13px;
+}
+
+.result-basket__promocode input {
+	width: 100%;
+	height: 100%;
+	padding: 4px 15px;
+	background: #fff;
+	border: 1px solid #d9d9d9;
+	border-radius: 8px;
+	font-size: 16px;
+	line-height: 160%;
+	color: #000;
+}
+
+.result-basket__promocode input::placeholder {
+	color: #000;
+}
+
+.result-basket__promocode input:focus {
+	outline: none;
+}
+
+.result-basket__button {
+	display: block;
+	width: 100%;
+	padding: 11px 10px;
+	font-size: 15px;
+	line-height: 120%;
+	text-align: center;
+	color: #ffffff;
+	background: #252525;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	transition: all 0.3s ease;
+}
+
+.result-basket__button:hover {
+	background: transparent;
+	color: #252525;
+	border-color: #252525;
+	text-decoration: none;
+}
+
+.card-result-basket {
+	padding: 12px 0;
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	border-bottom: 1px solid #e9e9e9;
+}
+
+.card-result-basket:first-child {
+	border-top: 1px solid #e9e9e9;
+}
+
+.card-result-basket__name {
+	max-width: 150px;
+	width: 100%;
+	font-size: 12px;
+	line-height: 120%;
+	color: #000000;
+}
+
+.card-result-basket__delete {
+	cursor: pointer;
+	position: relative;
+	width: 20px;
+	height: 20px;
+}
+
+.card-result-basket__delete:hover::before,
+.card-result-basket__delete:hover:after {
+	background: #000;
+}
+
+.card-result-basket__delete::before,
+.card-result-basket__delete::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 100%;
+	height: 3px;
+	background: #e9e9e9;
+	border-radius: 2px;
+	transition: all 0.3s ease;
+}
+
+.card-result-basket__delete::before {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.card-result-basket__delete::after {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.card-result-basket__quantity-wrap {
+	margin-top: 15px;
+}
+
+.card-result-basket__price {
+	margin-top: 15px;
+}
+
+.card-result-basket__bottom {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.card-result-basket__quantity {
+}
+
+.card-result-basket__price {
+	align-self: center;
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 120%;
+	color: #000000;
+}
+
+.quantity-basket {
+	max-width: 90px;
+	display: flex;
+	padding: 3px 13px;
+	border: 1px solid #bdbdbd;
+	border-radius: 8px;
+}
+
+.quantity-basket__sub {
+	cursor: pointer;
+	position: relative;
+	width: 10px;
+	margin-right: 12px;
+}
+
+.quantity-basket__sub:hover::before {
+	background: #000;
+}
+
+.quantity-basket__sub::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 100%;
+	height: 2px;
+	background: #7c7c7c;
+	transition: all 0.3s ease;
+}
+
+.quantity-basket__value {
+	width: 20px;
+	background: none;
+	border: none;
+	font-size: 12px;
+	line-height: 120%;
+	text-align: center;
+	color: #000000;
+}
+
+.quantity-basket__value:focus {
+	outline: none;
+}
+
+.quantity-basket__add {
+	cursor: pointer;
+	position: relative;
+	width: 10px;
+	margin-left: 10px;
+}
+
+.quantity-basket__add:hover::before,
+.quantity-basket__add:hover::after {
+	background: #000;
+}
+
+.quantity-basket__add::before,
+.quantity-basket__add::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 100%;
+	height: 2px;
+	background: #7c7c7c;
+	transition: all 0.3s ease;
+}
+
+.quantity-basket__add::after {
+	transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.order-basket__add-dishes {
+}
+
+.add-dishes {
+}
+
+.add-dishes__title {
+	margin-bottom: 20px;
+	font-size: 20px;
+	line-height: 160%;
+	color: #000000;
+}
+
+.add-dishes__list {
+}
+
+.add-dishes__item:not(:last-child) {
+	margin-bottom: 20px;
+}
+
+.card-add-dishes {
+}
+
+.card-add-dishes__icon {
+	margin-bottom: 20px;
+}
+
+.card-add-dishes__slider {
+	overflow: initial;
+	max-width: 195px;
+	margin-left: initial;
+}
+
+.card-add-dishes-sldier__next {
+	cursor: pointer;
+	position: absolute;
+	top: 25%;
+	left: 197px;
+	transform: translate(0, -50%);
+	background-image: none;
+
+	width: 15px;
+	height: 15px;
+	transform: rotate(135deg);
+	z-index: 3;
+	box-sizing: border-box;
+}
+
+.card-add-dishes-sldier__next::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 15px;
+	height: 15px;
+	border-left: 3px solid #909090;
+	border-top: 3px solid #909090;
+}
+
+.card-add-dishes-sldier__next.swiper-button-disabled {
+	opacity: 0.5;
+}
+
+.card-add-dishes__image {
+	margin-bottom: 15px;
+}
+
+.card-add-dishes__image img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	border-radius: 5px;
+}
+
+.card-add-dishes__group {
+	/* display: flex;
+	justify-content: space-between;
+	align-items: center; */
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+
+.card-add-dishes__name {
+	grid-column: span 2;
+	font-size: 12px;
+	line-height: 120%;
+	color: #000000;
+}
+
+.card-add-dishes__price {
+	font-size: 15px;
+	line-height: 120%;
+	color: #000000;
+}
+
+.card-add-dishes__button-wrap {
+	display: none;
+}
+
+.card-add-dishes__button {
+	width: 38px;
+	height: 35px;
+	background: transparent url("./image/cart.svg") center center no-repeat;
+	cursor: pointer;
+}
+
+.card-add-dishes__quantity {
+}
+
+.card-add-dishes-sldier__wrapper {
+}
+
+.card-add-dishes-sldier__sldie {
+	max-width: 195px;
+}
+
+.main-basket__palce-order {
+	padding: 30px;
+}
+
+.palce-order-basket__price {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.palce-order-basket__price-name {
+	margin-right: 20px;
+	margin-bottom: 25px;
+	font-size: 17px;
+	line-height: 130%;
+	color: #000000;
+}
+
+.palce-order-basket__price-value {
+	margin-bottom: 25px;
+	font-size: 20px;
+	line-height: 110%;
+	color: #000000;
+}
+
+.palce-order-basket__button-order {
+	display: block;
+	width: 100%;
+	padding: 11px 10px;
+	font-size: 15px;
+	line-height: 120%;
+	text-align: center;
+	color: #ffffff;
+	background: #bc450d;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	transition: all 0.3s ease;
+}
+
+.palce-order-basket__button-order:hover {
+	background: transparent;
+	border-color: #bc450d;
+	color: #bc450d;
+}
+
+.palce-order-basket__button-order:focus {
+	outline: none;
+	border: none;
+}
+
+@media (max-width: 960px) {
+	.main-wrapper {
+		flex-direction: column-reverse;
+	}
+
+	.main-wrapper__content {
+		margin-right: 0;
+	}
+
+	.main-basket__wrap {
+		position: static;
+	}
+
+	.main-wrapper__basket {
+		flex-basis: initial;
+		max-width: 720px;
+		width: 100%;
+		margin: 0 auto;
+	}
+
+	.result-basket {
+		padding: 15px 0px;
+	}
+
+	.result-basket__title {
+		padding: 0 15px;
+		display: none;
+	}
+
+	.result-basket__list {
+		padding: 0 15px;
+		overflow: auto;
+		max-height: 360px;
+	}
+
+	.result-basket__promocode-group {
+		display: flex;
+		padding: 0 15px;
+	}
+
+	.result-basket__promocode {
+		width: 50%;
+		margin-right: 10px;
+		margin-bottom: 0;
+	}
+
+	.result-basket__button {
+		width: 50%;
+	}
+
+	.order-basket {
+		padding: 15px;
+		background: none;
+	}
+
+	.main-basket__palce-order {
+		padding: 15px;
+	}
+
+	.order-basket {
+		overflow-x: hidden;
+		overflow-y: scroll;
+		max-height: 480px;
+	}
+
+	.card-add-dishes {
+		padding-bottom: 15px;
+		border-bottom: 1px solid #e9e9e9;
+	}
+
+	.add-dishes__title {
+		display: none;
+	}
+
+	.card-add-dishes__icon {
+		display: flex;
+		align-items: center;
+	}
+
+	.card-add-dishes__icon::before {
+		content: "Блюда из ресторана ";
+		font-size: 20px;
+		line-height: 120%;
+		color: #000000;
+		margin-right: 15px;
+	}
+
+	.card-add-dishes__quantity {
+		display: none;
+	}
+
+	.card-add-dishes__button-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		grid-column-start: 2;
+		grid-column-end: 3;
+		grid-row-start: 1;
+		grid-row-end: 3;
+	}
+
+	.card-add-dishes__button {
+	}
+
+	.card-add-dishes__group {
+		grid-template-columns: 1fr auto;
+	}
+
+	.card-add-dishes__name {
+		grid-column: span 1;
+		font-weight: bold;
+		font-size: 15px;
+		line-height: 100%;
+	}
+
+	.card-add-dishes__price::before {
+		content: "Цена ";
+	}
+
+	.card-result-basket {
+		align-items: center;
+	}
+
+	.card-result-basket__name {
+		order: 1;
+	}
+
+	.card-result-basket__delete {
+		order: 3;
+	}
+
+	.card-result-basket__price {
+		margin: 0 15px;
+		order: 2;
+	}
+
+	.card-result-basket__quantity-wrap {
+		width: 100%;
+		order: 4;
+	}
+
+	.card-add-dishes-sldier__next {
+		top: 18%;
+		width: 42px;
+		height: 42px;
+		border-radius: 50%;
+		background: #fbf6ee;
+	}
+
+	.add-dishes__list {
+		position: relative;
+	}
+
+	.add-dishes__list::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		right: -15px;
+		width: 25%;
+		height: 100%;
+		background: linear-gradient(270deg, #fbf6ee -10.58%, rgba(251, 246, 238, 0) 91.79%);
+		z-index: 3;
+	}
+}
+
+@media (max-width: 768px) {
+	.main-wrapper__basket {
+		max-width: 100%;
+	}
+}

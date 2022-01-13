@@ -1,0 +1,1562 @@
+function setCookie(name, value, options = {}) {
+    if (options.expires instanceof Date) {
+        options.expires = options.expires.toUTCString();
+    }
+    var updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+    for (var optionKey in options) {
+        updatedCookie += "; " + optionKey;
+        let optionValue = options[optionKey];
+        if (optionValue !== true) {
+            updatedCookie += "=" + optionValue;
+        }
+    }
+    document.cookie = updatedCookie;
+}
+
+var validation_rules={
+    date:{regex:/^\d\d.\d\d.\d\d\d\d$/},
+    datetime:{regex:/^\d\d.\d\d.\d\d\d\d \d\d:\d\d$/},
+    mobile_phone:{regex:/^\+7 \(\d\d\d\) \d\d\d-\d\d-\d\d$/},
+    phone:{regex:/^\+7\d\d\d\d\d\d\d\d\d\d$/},
+    pass_series: {regex: /^\d\d\d\d$/},
+    pass_number: {regex: /^\d\d\d\d\d\d$/},
+    pass_issuer: {regex: /^\d\d\d-\d\d\d$/},
+    inn: {regex: /^\d{12,12}$/},
+    inn_legal: {regex: /^\d{10,10}$/},
+    snils: {regex: /^\d\d\d-\d\d\d-\d\d\d-\d\d$/},
+    account: {regex: /^\d{20,20}$/},
+    bik: {regex: /^\d{6,9}$/},
+    sms_code: {regex: /^\d\d\d\d$/},
+    sms_code6: {regex: /^\d\d\d\d\d\d$/},
+    sms_code_big: {regex: /^\d\d\d-\d\d\d$/},
+    name: {regex: /^[a-zA-Zа-яА-Я\s-]+$/}
+};
+
+var ym_id = 38841655;
+
+function set_validate(){
+
+    $("form.js-validate").each(function() {
+        var rules = {};
+        $(this).find('[data-ilonmask]').each(function(){
+            if($(this).data('ilonmask') in validation_rules && $(this).attr('name')) {
+                rules[$(this).attr('name')] = validation_rules[$(this).data('ilonmask')];
+            }
+            if($(this).data('equalto')) {
+                rules['"'+$(this).attr('name')+'"'] = {equalTo: $(this).data('equalto')};
+            }
+        });
+        console.log(rules);
+        $(this).validate({
+            rules:rules,
+            ignore: ".ignore",
+            errorPlacement: function errorPlacement(error, element) {
+                return;
+            },
+            highlight: function (element) {
+                $(element).addClass("is-invalid");
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid");
+            }
+        });
+    });
+}
+
+$(function() {
+
+    var $body = $('body'),
+        fixed_personal_info_height = $body.height(),
+        is_mobile = !!$('body.mobile').length,
+        current_top = $('html').scrollTop(),
+        scroll_direction = 1;
+
+    window.onscroll = function() {
+        var t = $('html').scrollTop();
+        if ( current_top - t > 5 ) {
+            scroll_direction = 0;
+            current_top = t;
+        } else if ( current_top - t < -5 ) {
+            scroll_direction = 1;
+            current_top = t;
+        }
+        var h = scroll_direction ? (is_mobile?70:1000) : 70;
+        if ( t > h && scroll_direction ) {
+            $body.addClass('fixed');
+        }
+        if ( !is_mobile && $('.personal_info').length ) {
+            var o = $('.personal_info').offset(),
+                d = o.top - 70;
+            if ( t > d && !$body.is('.personal-fixed') ) {
+                $body.addClass('personal-fixed');
+                fixed_personal_info_height = d;
+            }
+            if ( t < fixed_personal_info_height && $body.is('.personal-fixed') && !$body.hasClass('cart-opened') ) {
+                $body.removeClass('personal-fixed');
+            }
+        }
+        if ( t < h && !scroll_direction && !$body.hasClass('cart-opened')) {
+            $body.removeClass('fixed').removeClass('personal-fixed');
+        }
+    };
+
+
+    $('#burger').click(function () {
+        $(this).toggleClass('burger--active');
+    });
+    $('#burger-modal').on('hidden.bs.modal',function () {
+        $('#burger').removeClass('burger--active');
+        $('.burger__fade').remove();
+        $('.product__bottom').show();
+    }).on('show.bs.modal',function () {
+        $('#burger').addClass('burger--active');
+        $body.append($('<div/>').addClass('burger__fade'));
+        $('.product__bottom').hide();
+    });
+
+    $('.header__burger_item_with_submenu').click(function () {
+        $(this).closest('.header__burger_item_with_submenu').toggleClass('header__burger_item_with_submenu--active');
+    });
+
+    $('#home-carousel').carousel({ touch: true });
+
+    $('.product_carousel').on('slide.bs.carousel', function (e) {
+        var $e = $(e.relatedTarget);
+        var idx = $e.index();
+        var itemsPerSlide = 4;
+        var totalItems = $('.carousel-item',$(this)).length;
+        var id = $(this).attr('id');
+        if (idx >= totalItems - (itemsPerSlide - 1)) {
+            var it = itemsPerSlide - (totalItems - idx);
+            for (var i = 0; i < it; i++) {
+                // append slides to end
+                if (e.direction == "left") {
+                    $('.carousel-item',$(this)).eq(i).appendTo('#'+id+' .carousel-inner');
+                } else {
+                    $('.carousel-item',$(this)).eq(0).appendTo('#'+id+' .carousel-inner');
+                }
+            }
+        }
+    });
+
+    function init_product_hover() {
+        $('.product_carousel__item').hover(function () {
+            var h = $('.product_carousel__description',this).height(),
+                c = 'product_carousel__title_wr',
+                wr = $('.'+c,this);
+            if ( !wr.is(c+'--slided') && h > 60 ) {
+                if ( !wr.data('height') ) {
+                    wr.data('height',wr.height());
+                }
+                wr.addClass(c+'--slided').height((h+60)+'px').css('top','-'+(h-60)+'px');
+            }
+        },function () {
+            var c = '.product_carousel__title_wr--slided';
+            $(c).each(function () {
+                var s = $(this);
+                s.length && s.removeClass(c).css('height',s.data('height')+'px').css('top','0');
+            });
+        });
+    }
+
+    init_product_hover();
+
+
+    $('.product__sku_size_list li').click(function () {
+        var id = $(this).data('sku-id');
+        $('.product__sku_size_list li.active').removeClass('active');
+        $(this).addClass('active');
+        $('.product__features').hide();
+        $('#sku-'+id+'-features').show();
+        $('.product__price').not('.product__bottom .product__price').hide();
+        $('#sku-'+id).show();
+        $('.product__description').hide();
+        $('#product-'+id+'-description, #product-'+id+'-description-2').show();
+        $('.product__buy').not('.product__bottom .product__buy').hide();
+        $('#sku-'+id+'-btn').show();
+        $('.product__bottom').hide();
+        $('#product__bottom-'+id).show();
+        return false;
+    });
+
+    $('.product__image a').click(function () {
+        $('.product__core_image img').attr('src',$(this).attr('href'));
+        $('.product__image').removeClass('selected');
+        $(this).closest('.product__image').addClass('selected');
+        return false;
+    });
+
+    $('.header__item_with_submenu').hover(function () {
+        $(this).addClass('header__item_with_submenu--active');
+    },function () {
+        $(this).removeClass('header__item_with_submenu--active');
+    });
+
+    $('.personal_info__hgclub .personal_info__hgclub--first a').click(function () {
+        var p = $('.personal_info__hgclub'), a = p.is('.personal_info__hgclub--active');
+        p.addClass('personal_info__hgclub--active');
+        if ( !$('.personal_info__address_backdrop').length ) {
+            $body.append($('<div/>').addClass('modal-backdrop show personal_info__address_backdrop'));
+        }
+        return a;
+    });
+
+    $('.personal_info__hgclub_info_btn_i').click(function () {
+        if ( $('.personal_info__hgclub').is('.personal_info__hgclub--second') ) {
+            $('.personal_info__hgclub').removeClass('personal_info__hgclub--second');
+        } else {
+            $('.personal_info__hgclub').addClass('personal_info__hgclub--second');
+        }
+        return false;
+    });
+
+    $body.on('click','.personal_info__address_backdrop, .personal_info__hgclub_info_btn_ok',function () {
+        $('.personal_info__hgclub').removeClass('personal_info__hgclub--active').removeClass('personal_info__hgclub--second');
+        $('.personal_info__address_backdrop').remove();
+        return false;
+    });
+
+
+    $('.product_list__lazyload_btn').click(function () {
+        var t = $(this);
+        var p = t.data('current-page');
+        var c = t.data('count-per-page');
+        var url = t.attr('href');
+        var product_list = $('#product-list .product_list');
+        var paging = $('.product_list__paging_menu');
+        if ( t.data('sleep') != 1 ) {
+            t.data('sleep',1);
+            t.hide();
+            $.get(url, function (html) {
+                var tmp = $('<div></div>').html(html);
+                product_list.append(tmp.find('.product_list__item'));
+                var tmp_paging = tmp.find('.product_list__paging_menu');
+                paging.replaceWith(tmp_paging);
+                var current = tmp_paging.find('.selected');
+                var next = current.next();
+                if ( next.length ) {
+                    t.attr('href',$('a',next).attr('href'));
+                } else {
+                    t.remove();
+                }
+                t.data('sleep',0);
+                t.show();
+                init_product_hover();
+            });
+        }
+
+        return false;
+    });
+
+    $('.feedback__btn').click(function () {
+        $($(this).attr('href')+'-modal').modal('show');
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotoreview');
+        console.log('gotoreview');
+        return false;
+    });
+
+    $('.product__buy').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotobuy');
+        console.log('gotobuy');
+    });
+
+    $('.header__app_menu .mark').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotorest');
+        console.log('gotorest');
+    });
+
+    $('.st-btn').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','sharetosocial');
+        console.log('sharetosocial');
+    });
+
+    $('.personal_info__pick > a').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotowant');
+        console.log('gotowant');
+    });
+
+    $('.personal_info__hgclub_info_btn, .personal_info__hgclub--first a').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotoweb');
+        console.log('gotoweb');
+    });
+
+    $('.header__app_submenu_item_delivery').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotomenu');
+        console.log('gotomenu');
+    });
+
+    $('.footer__page_menu_item_delivery').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotofdeliv');
+        console.log('gotofdeliv');
+    });
+
+    $('.footer__page_menu_item_hg').click(function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotofhg');
+        console.log('gotofhg');
+    });
+
+    setCookie('BITRIX_SM_GEOIP_SITE_ID', 's1', { path:'/', secure: false, 'max-age': 2592000, 'domain': '.ilpatio.ru' });
+
+    $('.restaurant__dropdown-toggle').on('click', function () {
+        var menu = $(this).next('.restaurant__dropdown-menu');
+        if (menu.is(':visible')) {
+            menu.hide();
+        } else {
+            menu.show();
+        }
+    });
+
+    $('.category_list__btn').click(function () {
+        $(this).data('height',$('.category_list').height());
+        $('.category_list').css('height','');
+        $('.category_list__filter_wr').addClass('category_list__filter_wr-open');
+        $body.append($('<div/>').addClass('modal-backdrop fade show category_list__filter_backdrop'));
+        return false;
+    });
+
+    $body.on('click','.category_list__slice, .category_list__filter_wr-open',function () {
+        $('.category_list').animate({height:$('.category_list__btn').data('height')+'px'},function () {
+            $('.category_list__filter_wr').removeClass('category_list__filter_wr-open');
+
+            $('.category_list__filter_backdrop').remove();
+        });
+    }).on('click','.slideup__slice, .slideup__wr-open, .personal_info__hgclub_info_btn_ok',function () {
+        $('.personal__order_modal_content').animate({height:0},function () {
+            $('.slideup__wr').removeClass('slideup__wr-open');
+            $(this).css('height','');
+            $('.personal__order_modal_mobile_backdrop').remove();
+        });
+    });
+
+
+    $('.personal_info__pick a').click(function () {
+        var pi = 'personal_info__', pip = pi+'pick', p = pi+'address_input', t = $(this), $i = $(t.data('input'));
+        if ( !t.is('.'+pip+'--selected') ) {
+            $('.'+pip+' a').removeClass(pip+'--selected');
+            if ( t.is('.'+pip+'--takeaway') ) {
+                $('.'+pip+'--takeaway').addClass(''+pip+'--selected');
+            } else if ( t.is('.'+pip+'--delivery') ) {
+                $('.'+pip+'--delivery').addClass(''+pip+'--selected');
+            }
+            $('.'+p+'--active').removeClass(p+'--active');
+            $i.addClass(p+'--active');
+            if ( $i.is('#'+pi+'shipping_pick') ) {
+                $('.'+pi+'tc').hide();
+            } else {
+                $('.'+pi+'tc').show();
+            }
+        }
+        if ( t.is('.'+pip+'--takeaway') ) {
+            $('#delivery_modal').modal('show');
+            $('#pick_modal').modal('hide');
+        } else if ( t.is('.'+pip+'--delivery') ) {
+            $('#delivery_modal').modal('hide');
+            $('#pick_modal').modal('show');
+        }
+        return false;
+    });
+
+    $body.on('click','.js-cart-open',function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotocart');
+        console.log('gotocart');
+        showCartModal();
+        $body.addClass('fixed').addClass('personal-fixed').addClass('cart-opened');
+        return false;
+    }).on('click','.js-cart-close',function () {
+        $body.removeClass('cart-opened');
+        $(window).trigger('scroll');
+        return false;
+    }).on('click','.js-cart-item-delete',function () {
+        var t = $(this),
+            id = t.data('id');
+        if ( id ) {
+            $.get('/fo/cart/delete/'+id+'/item/',function (r) {
+                if ( r.status == 'ok' ) {
+                    t.closest('.cart-item').slideUp('fast', function(){
+                        t.remove();
+                        showCartModal();
+                    });
+                }
+            },'json');
+        }
+    }).on('click','.js-cart-item-minus',function () {
+        var t = $(this).closest('.input-group').find('.js-cart-item-count'), v = 1*t.val();
+        if ( v>0 ) { t.val(v-1); } else { t.val(0); }
+        changeModificatorQty(t);
+        return false;
+    }).on('click','.js-cart-item-plus',function () {
+        var t = $(this).parents('.input-group').find('.js-cart-item-count'), v = 1*t.val();
+        if ( v<99 ) { t.val(v+1); } else { t.val(99); }
+        return changeModificatorQty(t);
+    }).on('input','.js-cart-item-count',function () {
+        var t = $(this), v = 1*t.val();
+        if ( v<0 ) { t.val(0); }
+        if ( v>99 ) { t.val(99); }
+        changeModificatorQty(t);
+        return false;
+    }).on('keydown','.js-cart-item-count',function () {
+        return e.keyCode>=48 && e.keyCode<=57;
+    }).on('click','.js-cancel-promocode',function () {
+        var t = $(this);
+        $.ri.api.foCancelPromocode(function (r) {
+            $.ri.lib.logResponse(r);
+            if ( r.status === 'ok' ) {
+                t.siblings('.js-promocode').removeAttr('disabled').val('');
+                $('button',t.closest('.cart-popup__promocode_wr')).removeAttr('disabled');
+                setTotalCart(r.data.total, r.data.total_with_discount);
+                $('.popup__gift').remove();
+            }
+        });
+    }).on('click','.js-apply-promocode',function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotopromocart');
+        console.log('gotopromocart');
+        var t = $(this),
+            i = $('input',t.closest('.cart-popup__promocode_wr')),
+            v = i.val();
+        if ( v ) {
+            t.attr('disabled','disabled');
+            i.attr('disabled','disabled');
+            $.ri.lib.createPromoActivationModal(v,i.data('phone'));
+            $('#promo_activation_modal').modal('show');
+        }
+    }).on('click','.gift_modal__product_btn',function () {
+        var c = $(this).data('code');
+        $.ri.api.foApplyGift(c,function (r) {
+            $.ri.lib.logResponse(r);
+            if ( r.status === 'ok' ) {
+                $body.removeClass('no-gift-selected');
+                $('#gift_modal').modal('hide');
+                createGiftBlock(r.data);
+            }
+        });
+    }).on('click','.restaurants__book_backdrop',function () {
+        $('.restaurants__book--open').removeClass('restaurants__book--open');
+        $('.restaurants__book_backdrop').remove();
+    }).on('click','.js-add2cart',function () {
+        if ( !$(this).is('.product_carousel__add2cart--disabled') ) {
+            typeof ym == 'function' && ym(ym_id,'reachGoal','gotocartlist');
+            console.log('gotocartlist');
+            var i = $(this).data('sku-id'), pn = $(this).data('product-name'),
+                shipping = parseInt($('body').data('shipping'));
+            if ( $(this).is('.js-with-modificators') ) {
+                createModificatorsModal();
+                $body.data('sku-id',i).data('mode','choose_modificators').data('product-name',pn);
+                if ( shipping ) {
+                    $('#modificators-modal').modal('show');
+                } else {
+                    $('.personal_info__address_input--active').trigger('click');
+                }
+            } else {
+                $body.data('sku-id',i).data('mode','add_without_modificators').data('product-name',pn);
+                if ( shipping ) {
+                    addToCart(i);
+                } else {
+                    $('.personal_info__address_input--active').trigger('click');
+                }
+            }
+        }
+        return false;
+    }).on('click','.js-add2cart-with-modificators',function () {
+        var f = $(this).closest('form'), $c = $('.js-cart-item-count'), p = {};
+        $c.removeAttr('disabled');
+        p = f.serializeArray();
+        $c.attr('disabled','disabled');
+        $.post(f.attr('action'),p,function (r) {
+            $("#modificators-modal .close").trigger('click');
+            $body.removeClass('modal-open');
+            if ( r.status === 'ok' ) {
+                add2CartSuccess(r.data.total,r.data.qty,1);
+            } else {
+                add2CartFail();
+            }
+        },'json');
+        return false;
+    }).on('click','.js-auth',function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotolk');
+        console.log('gotolk');
+        createAuthModal($(this).is('.js-restore-mode')?$(this).data('login'):'');
+        $('#modal_auth').modal();
+        return false;
+    }).on('click','.js-restore',function () {
+        createRestoreModal();
+        $('#modal_restore').modal();
+        return false;
+    }).on('submit','.js-ajax',function () {
+        console.log(this);
+        return false;
+    }).on('click','.seo_text__home_content_btn',function () {
+        var t = $(this), s = 'seo_text__home_content';
+        t.toggleClass(s+'--active');
+        $('.'+s).toggleClass(s+'--show');
+        return false;
+    }).on('click','.js-order',function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotocartpop');
+        console.log('gotocartpop');
+    }).on('click','.js-ym-gotobackmenu',function () {
+        typeof ym == 'function' && ym(ym_id,'reachGoal','gotobackmenu');
+        console.log('gotobackmenu');
+    }).on('click','.js-modificator-sku',function () {
+        var t = $(this), sid = t.data('sku-id'), p = t.data('price'), m = 'modificators-modal';
+        $('#'+m+' .js-modificator-form').attr('action','/fo/addtocart/'+sid+'/');
+        $('#'+m+' .'+m+'__price_value').data('price',p).html(p+' ₽');
+        changeModificatorQty(t);
+        t.closest('ul').find('.active').removeClass('active');
+        t.closest('li').addClass('active');
+        return false;
+    });
+
+    if ( $('.js-restore-mode').length ) {
+        $('.js-restore-mode').trigger('click');
+    }
+
+    function createModificatorsModal() {
+        if ( !$('#modificators-modal').length ) {
+            var d = '<div/>', s = '<span/>', b = '<button/>';
+            $body.append($(d).attr('class','modal fade modal-fullscreen-md-down').attr('tabindex','-1').attr('role','dialog').attr('id','modificators-modal').attr('aria-labelledby','modificators-modal').attr('aria-hidden','true')
+                .append($(d).attr('class','modal-dialog modal-dialog-centered').attr('role','document')
+                    .append($(d).attr('class','modal-content')
+                        .append($(d).attr('class','modal-head')
+                            .append($(b).attr('type','button').attr('class','close').attr('data-dismiss','modal').attr('aria-label','Close')
+                                .append($(s).attr('aria-hidden','true').html('&times;'))))
+                        .append($('<div/>').attr('class','modal-body')))));
+            var m = $('#modificators-modal');
+            m.on('show.bs.modal', function (e) {
+                var sid = $body.data('sku-id'), pn = $body.data('product-name'),
+                    d = '<div/>', b = '<button/>';
+                $('.modal-body',m).html('')
+                    .append($('<h2/>').text(pn))
+                    .append($('<h3/>').text('Выберите ингредиенты'))
+                    .append($('<form/>').attr({action:'/fo/addtocart/'+sid+'/',method:'post',class:'js-modificator-form'})
+                        .append($(d).addClass('modificators-modal__list thin-scrollbar'))
+                        .append($(d).addClass('modificators-modal__price')
+                            .append($(s).addClass('modificators-modal__price_title').text('Цена:'))
+                            .append($(s).addClass('modificators-modal__price_value')))
+                        .append($('<a/>').addClass('product__buy js-add2cart-with-modificators')
+                            .attr('href','#').text('Добавить в корзину')));
+                $.get('/fo/modificators/'+sid+'/',function (r) {
+                    if ( r.status === 'ok' ) {
+                        var sp = parseInt(r.data.price);
+                        $('.modificators-modal__price_value',m).data('price',sp).text(sp+' ₽');
+                        for ( var i in r.data.modificators ) {
+                            var p = parseInt(r.data.modificators[i].price);
+                            $('.modificators-modal__list')
+                                .append($(d).addClass('cart-item')
+                                    .append($(d).addClass('cart-item__title').text(r.data.modificators[i].name))
+                                    .append($(d).addClass('cart-item__price').data('price',p).text(p+' ₽'))
+                                    .append($(d).addClass('cart-item__quantity')
+                                        .append($(d).addClass('input-group')
+                                            .append($(d).addClass('input-group-prepend')
+                                                .append($(s).addClass('cart-item__btn-minus js-cart-item-minus').text('-')))
+                                            .append($('<input/>').attr({min:0,max:99,name:'modificators['+r.data.modificators[i].code+']',class:'form-control cart-item__count js-cart-item-count',disabled:'disabled'}).val(0))
+                                            .append($(d).addClass('input-group-append')
+                                                .append($(s).addClass('cart-item__btn-plus js-cart-item-plus').text('+'))))))
+                        }
+                        console.log(r.data);
+                        if ( r.data.skus.length ) {
+                            $('.modal-body h2',m).after($('<ul/>').addClass('product__sku_size_list')).after($(d).addClass('pbx-20').text('Размер'));
+                            for ( var sk in r.data.skus ) {
+                                var sku = r.data.skus[sk];
+                                $('.product__sku_size_list',m).append($('<li/>').attr({class:sku.active?'active':''})
+                                    .append($('<a/>').attr({href:'#sku-'+sku.id,class:'js-modificator-sku','data-sku-id':sku.id,'data-price':parseInt(sku.price)}).text(sku.name)));
+                            }
+
+                        }
+                    }
+                },'json');
+            });
+        }
+    }
+
+    function createAuthModal(login) {
+        if ( !$('#modal_auth').length ) {
+            var d = '<div/>', b = '<button/>', s = '<span/>', i = '<input/>';
+            $body.append($(d).attr({tabindex:'-1',id:'modal_auth',class:'modal fade common-dialog modal-auth'})
+                .append($(d).attr('class','modal-dialog modal-dialog-centered')
+                    .append($(d).attr('class','modal-content')
+                        .append($(d).attr('class','modal-header')
+                            .append($(b).attr({type:'button','data-dismiss':'modal','aria-label':'Close',class:'close'})
+                                .append($(s).attr('aria-hidden',true).html('&times;')))
+                            .append($('<h5/>').attr('class','modal-title').text('Вход')))
+                        .append($(d).attr('class','modal-body')
+                            .append($('<form/>').attr({action:'/auth/',class:'auth-form js-validate js-ajax'})
+                                .append($(d)
+                                    .append($(i).attr({type:'email',name:'email',class:'js-login-email',required:'required',placeholder:'Укажите свой e-mail'}).val(login)))
+                                .append($(d)
+                                    .append($(i).attr({type:'password',name:'password',class:'js-login-password',required:'required',placeholder:'Введите пароль'})))
+                                .append($(d).attr('class','text-right')
+                                    .append($('<a/>').attr({href:'#',class:'auth-form__forgot js-restore','data-dismiss':'modal'}).text('Забыл пароль')))
+                                .append($(d)
+                                    .append($('<p/>').attr('class','auth-form__comment').text('Нажимаю кнопку войти, вы выражаете своё согласие на обработку персональных данных')))
+                                .append($(d).attr('class','row')
+                                    .append($(d).attr('class','col-auto')
+                                        .append($(b).attr({class:'btn btn-primary',type:'submit'}).text('Войти')))
+                                    .append($(d).attr('class','col')
+                                        .append($('<label/>').attr('class','common-checkbox')
+                                            .append($(i).attr({type:'checkbox',name:'remember',checked:'checked'}))
+                                            .append($(s).text('Запомнить меня'))))))))));
+            if ( login ) {
+                $('.modal-auth .modal-body').prepend($(d).addClass('mt-3 mb-3 auth-form__badge auth-form__badge--green').html('Мы отправили новый пароль к вам на почту!'));
+            }
+            set_validate();
+            $('.modal-auth .auth-form').submit(function () {
+                var p = {
+                    login:  $('.js-login-email').val(),
+                    password:  $('.js-login-password').val(),
+                    wa_json_mode: 1,
+                    wa_auth_login: 1,
+                    need_redirects: 0
+                };
+                $('.auth-form__badge--red').remove();
+                $.post('/login/',p,function (r) {
+                    if ( r.status === 'ok' ) {
+                        window.location.href = '/my/orders/';
+                    } else {
+                        $('.modal-auth .modal-body').prepend($(d).addClass('mt-3 mb-3 auth-form__badge auth-form__badge--red').html('Неверный логин или пароль'));
+                    }
+                    console.log(r);debugger;
+                },'json');
+                return false;
+            });
+        }
+    }
+
+    function createRestoreModal() {
+        if ( !$('#modal_restore').length ) {
+            var d = '<div/>', b = '<button/>', s = '<span/>', i = '<input/>';
+            $body.append($(d).attr({class:'modal fade common-dialog modal-restore',tabindex:'-1',id:'modal_restore'})
+                .append($(d).attr('class','modal-dialog modal-dialog-centered')
+                    .append($(d).attr('class','modal-content')
+                        .append($(d).attr('class','modal-header')
+                            .append($(b).attr({type:'button',class:'close','data-dismiss':'modal','aria-label':'Close'})
+                                .append($(s).attr('aria-hidden',true).html('&times;')))
+                            .append($('<h5/>').attr('class','modal-title').text('Восстановление пароля')))
+                        .append($(d).attr('class','modal-body')
+                            .append($('<form/>').attr({class:'auth-form js-validate js-ajax',action:'/restore/'})
+                                .append($(d).attr('class','mb-4')
+                                    .append($(i).attr({type:'email',name:'email',class:'js-restore-email',required:'required',placeholder:'Укажите свой e-mail'})))
+                                .append($(d).attr('class','row')
+                                    .append($(d).attr('class','col-auto')
+                                        .append($(b).attr({class:'btn btn-primary',type:'submit'}).text('Отправить новый пароль')))))))));
+            set_validate();
+            $('.modal-restore .auth-form').submit(function () {
+                var p = {
+                    login:  $('.js-restore-email').val(),
+                    wa_json_mode: 1,
+                    need_redirects: 0
+                };
+                $('.auth-form__badge').remove();
+                $.post('/forgotpassword/',p,function (r) {
+                    if ( r.status === 'ok' ) {
+                        $('.modal-restore .modal-body').html('').prepend($(d).addClass('mt-3 mb-3 auth-form__badge auth-form__badge--green').html(r.data.sent_message));
+                    } else {
+                        $('.modal-restore .modal-body').prepend($(d).addClass('mt-3 mb-3 auth-form__badge auth-form__badge--red').html('Неверный логин'));
+                    }
+                    console.log(r);debugger;
+                },'json');
+                return false;
+            });
+        }
+    }
+
+    function addToCart(sku_id) {
+        $.ri.api.foAddToCart(sku_id,function (r) {
+            $.ri.lib.logResponse(r);
+            if (r.status === 'ok') {
+                add2CartSuccess(r.data.total,r.data.qty,1);
+            } else {
+                add2CartFail();
+            }
+        });
+    }
+
+    function createCartModal() {
+        var d = '<div/>', a = '<a/>', s = '<span/>', p = 'cart-popup';
+        $body.append($(d).addClass(p+'-wrp')
+            .append($(d).addClass(p)
+                .append($(d).addClass(p+'__header d-flex align-items-center')
+                    .append($(a).attr('href','#').addClass('js-cart-close mr-2'))
+                    .append($(s).text('Ваш заказ')))
+                .append($(d).addClass(p+'__body thin-scrollbar'))
+                .append($(d).hide().addClass(p+'__footer')
+                    .append($(d).addClass('form-row justify-content-between mb-3 pb-1 cart-popup__footer_price_wr')
+                        .append($(d).addClass('col').text('Сумма заказа'))
+                        .append($(d).addClass('col-auto sum-old pr-3 cart-popup__footer_price_old'))
+                        .append($(d).addClass('col-auto cart-popup__footer_price')))
+                    .append($(d).addClass(p+'__order')
+                        .append($(a).attr('href','/ordering/shipping/').addClass('btn btn-primary js-order w-100')
+                            .text('Оформить заказ').hide()))))
+            .append($(d).addClass('cart-popup-shadow js-cart-close')));
+    }
+
+    function createGiftBlock(gift_name) {
+        var d = '<div/>';
+        $('.cart-popup__body .cart-popup__promocode_wr')
+            .before($(d).addClass('popup__gift')
+                .append($(d).addClass('form-row')
+                    .append($(d).addClass('col')
+                        .append($(d).addClass('popup__gift_title').text('Ваш подарок'))))
+                .append($(d).addClass('form-row')
+                    .append($(d).addClass('cart-item__title').html(gift_name))
+                    .append($(d).addClass('cart-item__price').html('0 ₽'))))
+    }
+
+    function showCartModal() {
+        var d = '<div/>', b = '<button/>', u = '<input/>', s = '<span/>', e = 'cart-item', cp = '.cart-popup__body',
+            cpp = $(cp);
+        if ( !cpp.length ) { createCartModal(); cpp = $(cp); }
+        cpp.html('');//.append($(d).addClass('cart-popup__body_gr'));
+        $.get('/fo/cart/info/',function (r) {
+            if ( r.status == 'ok' ) {
+                for ( var k in r.data.items ) {
+                    var i = r.data.items[k],
+                        id = 'cart_subitems_'+k,
+                        item = $(d).addClass(e).attr('id','cart-item-'+i.id)
+                            .append($(d).addClass(e+'__title').html(i.name))
+                            .append($(d).addClass(e+'__price').text(parseInt(i.price_with_modificators)+' ₽'))
+                            .append($(d).addClass(e+'__delete')
+                                .append($(b).addClass(e+'__btn-delete js-'+e+'-delete').attr('data-id',i.id)));
+
+                    if ( i.modificators.length ) {
+                        $('.'+e+'__title',item).data('toggle','collapse').addClass(e+'__with_modificators')
+                            .attr('data-toggle','collapse').attr('href','#'+id).attr('role','button')
+                            .attr('aria-expanded','false').attr('aria-controls','#'+id).addClass('collapsed');
+                        item.append($(d).addClass(e+'__subitems '+e+'__not_zero'));
+                        item.append($(d).addClass(e+'__subitems collapse').attr('id',id));
+                        for ( var n in i.modificators ) {
+                            var m = i.modificators[n],
+                                si = parseInt(m.quantity) > 0 ? '.'+e+'__not_zero' : '.'+e+'__subitems:not(.'+e+'__not_zero)';
+                            console.log(si);
+                            $(si,item).append($(d).addClass(e+' '+e+'--subitem')
+                                .append($(d).addClass(e+'__title').html(m.name))
+                                .append($(d).addClass(e+'__price').text(parseInt(m.price)+' ₽'))
+                                .append($(d).addClass(e+'__quantity')
+                                    .append($(d).addClass('input-group')
+                                        .append($(d).addClass('input-group-prepend')
+                                            .append($(s).addClass(e+'__btn-minus js-'+e+'-minus').text('-')))
+                                        .append($(u).attr({name:'modificators['+m.code+']','data-code':m.code,min:0,max:99,'data-id':m.id,disabled:'disabled'}).val(m.quantity)
+                                            .addClass('form-control '+e+'__count js-'+e+'-count'))
+                                        .append($(d).addClass('input-group-append')
+                                            .append($(s).addClass(e+'__btn-plus js-'+e+'-plus').text('+'))))));
+                        }
+                    }
+                    cpp.append(item);
+                }
+                cpp.append($(d).addClass('form-row mb-3 cart-popup__promocode_wr')
+                    .append($(d).addClass('col')
+                        .append($(d).addClass('input-group')
+                            .append($(u).attr('type','text').attr('placeholder','Промокод').addClass('form-control cart-popup__promocode js-promocode').data('phone',r.data.phone))
+                            .append($(b).addClass('btn bg-transparent js-cancel-promocode cart-popup__btn-cancel-promocode'))))
+                    .append($(d).addClass('col-auto')
+                        .append($(b).addClass('btn btn-promocode js-apply-promocode cart-popup__btn-promocode').text('Применить'))));
+
+                if ( r.data.promo_code ) {
+                    $('.js-promocode').attr('disabled','disabled').val(r.data.promo_code);
+                    $('.js-apply-promocode').attr('disabled','disabled');
+                }
+
+                if ( r.data.gift ) {
+                    createGiftBlock(r.data.gift_name);
+                }
+
+                add2CartSuccess(r.data.total,r.data.items.length,0);
+                showStoppedItems(r.data.stopped_items);
+                setTotalCart(r.data.total,r.data.total_with_discount);
+                setCartMessage(r.data.message);
+                $('.collapse').collapse('hide').on('hidden.bs.collapse', function () {
+                    var t = $(this),
+                        z = $('.'+e+'__not_zero',t.closest('.'+e));
+                    $('.'+e+'--subitem',t).each(function () {
+                        if ( $('input',this).val() > 0 ) {
+                            $(this).detach().prependTo(z);
+                        }
+                    });
+                    $('.'+e+'--subitem',z).each(function () {
+                        if ( $('input',this).val() == 0 ) {
+                            $(this).detach().prependTo(t);
+                        }
+                    });
+                })
+            } else {
+                cpp.next().hide();
+                cpp.append($(d).addClass('cart-popup__empty_title').html('Упс, тут пока ничего нет. Что хотите попробовать?'));
+                $.get('/fo/categories/',function (r) {
+                    if ( r.status == 'ok' ) {
+                        var ul = $('<ul/>').addClass('category_list cart-popup__empty_category_list');
+                        for ( let i in r.data ) {
+                            let c = r.data[i];
+                            ul.append($('<li/>').append($('<a/>').attr('href','/category/'+c.url+'/').html(c.name)));
+                        }
+                        cpp.append(ul);
+                    }
+                },'json');
+                add2CartSuccess(0,0,0);
+            }
+        },'json');
+    }
+
+    function setCartMessage(msg) {
+        var d = '<div/>', c = '.cart-popup__order', m = c+'_message', b = c+' .btn';
+        $(m).remove();
+        if ( msg ) {
+            $(b).hide();
+            $(c).append($(d).addClass(m.replace('.','')).html(msg));
+        } else {
+            $(b).show();
+        }
+    }
+
+    function showStoppedItems(stopped_items) {
+        if ( stopped_items.length ) {
+            var c = 'cart-item', g = 'cart-popup__group', u = 'unavailable', d = '<div/>', b = '<button/>';
+            $('.cart-popup__body').append($(d).addClass(g+' '+g+'_'+u)
+                .append($(d).addClass(g+'-title').html('Позиции не доступны по выбранному адресу')));
+            for ( var k in stopped_items ) {
+                var i = stopped_items[k];
+                $('.'+g+'_'+u).append($(d).addClass(c+' '+c+'--'+u)
+                    .append($(d).addClass(c+'__title').html(i.name))
+                    .append($(d).addClass(c+'__price').html(parseInt(i.price)+' ₽'))
+                    .append($(d).addClass(c+'__delete')
+                        .append($(b).addClass(c+'__btn-delete js-'+c+'-delete').attr('data-id',i.id))));
+            }
+        }
+    }
+
+    function setTotalCart(op, np) {
+        var f = '.cart-popup__footer';
+        $(f+'_price_old').text(parseInt(op)+' ₽');
+        $(f+'_price').text(parseInt(np)+' ₽');
+        if ( op == np ) {
+            $(f+'_price_old').hide();
+        } else {
+            $(f+'_price_old').show();
+        }
+        $(f).show();
+    }
+
+    function add2CartFail(){
+        $('.personal_info__pick--selected').trigger('click');
+        showAdd2CartFail();
+    }
+
+    function changeModificatorQty(t) {
+        let o = 'modificators-modal', m = $('#'+o);
+        if ( t.closest('#'+o).length ) {
+            let p = $('.'+o+'__price_value',m).data('price');
+            $('.cart-item',m).each(function () {
+                p += $('.cart-item__price',this).data('price')*parseInt($('.cart-item__count',this).val());
+            });
+            $('.'+o+'__price_value',m).text(p+' ₽');
+        } else if ( t.closest('.cart-popup').length ) {
+            var $i = t.closest('.cart-item:not(.cart-item--subitem)');
+            $.ri.api.foCartChangeModificator(t.val(),t.data('code'),function (r) {
+                $.ri.lib.logResponse(r);
+                if ( r.status === 'ok' ) {
+                    $i.find('>.cart-item__price').text(parseInt(r.data.price_with_modificators)+' ₽');
+                    $.ri.api.foCartInfo(function (r) {
+                        $.ri.lib.logResponse(r);
+                        if ( r.status === 'ok' ) {
+                            setCartMessage(r.data.message);
+                            add2CartSuccess(r.data.total,r.data.items.length,0);
+                            setTotalCart(r.data.total,r.data.total_with_discount);
+                        }
+                    });
+                }
+            });
+        }
+        return false;
+    }
+
+    function add2CartSuccess($total,$qty,show) {
+        var c = 'personal_info__cart', s = '.'+c, n = s+'_noempty', e = s+'_empty', q = s+'_qty', t = s+'_total', w = c+'--show';
+        if ( $qty > 0 ) { $(n).addClass(w); $(e).removeClass(w); } else { $(n).removeClass(w); $(e).addClass(w); }
+        $(q+',.header__cart').text(parseInt($qty));
+        $(t).text(parseInt($total)+' ₽');
+        $body.data('sku-id','').data('mode','').data('product-name','');
+        if ( show ) { showAdd2CartSuccess(); }
+    }
+
+    function showAdd2CartSuccess(){
+        var c = 'cart__add2cart_message_success', s = '.'+c, w = c+'--show';
+        $(s).removeClass(w);
+        if ( !$(s).length ) { $body.append($('<div/>').addClass(c).text('Товар добавлен в корзину')) }
+        $(s).addClass(w);
+        setTimeout(function () { $(s).removeClass(w); },3000);
+    }
+
+    function showAdd2CartFail(){
+        var c = 'cart__add2cart_message_fail', s = '.'+c, w = c+'--show';
+        $(s).removeClass(w);
+        if ( !$(s).length ) { $body.append($('<div/>').addClass(c).text('Блюдо не доступно к заказу')) }
+        $(s).addClass(w);
+        setTimeout(function () { $(s).removeClass(w); },3000);
+    }
+
+    $('.cart-popup-shadow').on('scroll',function(e){ e.stopPropagation(); });
+
+    if ( typeof $.ri == 'undefined' ) {
+        $.ri = {};
+    }
+
+    $.ri.api = {
+        dadataSuggest: function (address,callback) {
+            $.ri.lib.logRequest('get','/dadata/suggest/<address>/',{address:address});
+            $.get('/dadata/suggest/'+encodeURIComponent(address)+'/',callback,'json');
+        },
+        dadataPosition: function (id,callback) {
+            $.ri.lib.logRequest('get','/dadata/position/<id>/',{id:id});
+            $.get('/dadata/position/'+id+'/',callback,'json');
+        },
+        dadataAddress: function (latitude,longitude,callback) {
+            $.ri.lib.logRequest('get','/dadata/address/<latitude>/<longitude>/',{latitude:latitude,longitude:longitude});
+            $.get('/dadata/address/'+latitude+'/'+longitude+'/',callback,'json');
+        },
+        customerSetLocation: function (l,callback) {
+            $.ri.lib.logRequest('get','/customer/set/location/<location_id>/',{l:l});
+            $.get('/customer/set/location/'+l+'/',callback,'json');
+        },
+        customerSetTakeaway: function (id,callback) {
+            $.ri.lib.logRequest('get','/customer/set/takeaway/<id>/',{id:id});
+            $.get('/customer/set/takeaway/'+id+'/',callback,'json');
+        },
+        customerGetRestaurantsCenter: function (callback) {
+            $.ri.lib.logRequest('get','customer/get/restaurants/center/',{});
+            $.get('/customer/get/restaurants/center/',callback,'json');
+        },
+        customerGetMapCenter: function (callback) {
+            $.ri.lib.logRequest('get','customer/get/map/center/',{});
+            $.get('/customer/get/map/center/',callback,'json');
+        },
+        foStoplist: function (l,callback) {
+            $.ri.lib.logRequest('get','/fo/stoplist/<location_id>/',{l:l});
+            $.get('/fo/stoplist/'+l+'/',callback,'json');
+        },
+        foStoplistCode: function (code,callback) {
+            $.ri.lib.logRequest('get','/fo/stoplist/<code>/code',{code:code});
+            $.get('/fo/stoplist/'+code+'/code/',callback,'json');
+        },
+        foLocation: function (id,callback) {
+            $.ri.lib.logRequest('get','/fo/location/<id>/',{id:id});
+            $.get('/fo/location/'+id+'/',callback,'json');
+        },
+        restaurantsGet: function (callback) {
+            $.ri.lib.logRequest('get','/restaurants/get/',{});
+            $.get('/restaurants/get/',callback,'json');
+        },
+        restaurantsSearch: function (address,callback) {
+            $.ri.lib.logRequest('get','/restaurants/search/<address>/',{address:address});
+            $.get('/restaurants/search/'+encodeURIComponent(address)+'/',callback,'json');
+        },
+        foAddToCart: function (sku_id,callback) {
+            $.ri.lib.logRequest('post','/fo/addtocart/<sku_id>/',{sku_id:sku_id});
+            $.post('/fo/addtocart/' +sku_id+ '/',callback,'json');
+        },
+        foApplyPromocode: function (code,phone,callback) {
+            $.ri.lib.logRequest('post','/fo/apply/promocode/',{code:code,phone:phone});
+            $.post('/fo/apply/promocode/',{code:code,phone:phone},callback,'json');
+        },
+        foCancelPromocode: function (callback) {
+            $.ri.lib.logRequest('get','/fo/cancel/promocode/',{});
+            $.get('/fo/cancel/promocode/',callback,'json');
+        },
+        foApplyGift: function (code,callback) {
+            $.ri.lib.logRequest('get','fo/apply/gift/<code>/code/',{code:code});
+            $.get('/fo/apply/gift/'+code+'/',callback,'json');
+        },
+        foCartChangeModificator: function (qty,code,callback) {
+            $.ri.lib.logRequest('post','/fo/cart/change/<qty>/<code>/modificator/',{qty:qty,code:code});
+            $.post('/fo/cart/change/'+qty+'/'+code+'/modificator/',callback,'json');
+        },
+        foCartInfo: function (callback) {
+            $.ri.lib.logRequest('get','/fo/cart/info/',{});
+            $.get('/fo/cart/info/',callback,'json');
+        }
+    };
+
+    $.ri.lib = {
+        logResponse: function(data){
+            console.log(Date.now(),data);
+        },
+        logRequest: function(method,path,arg){
+            console.log(Date.now(),method,path,arg);
+        },
+        applyStopList: function (product_ids) {
+            let c = 'product_carousel__add2cart', d = c + '--disabled', j = 'js-add2cart',m = 'Блюдо не доступно к заказу из данного ресторана', k = 'product_carousel__add2cart_disable_msg', f = 'product__add2cart_disable_msg';
+            $('.'+c).each(function () {
+                if ( $.inArray($(this).data('product-id'),product_ids) !== -1 ) {
+                    $(this).addClass(d).removeClass(j);
+                    $(this).closest('.product_list__item,.carousel-item').find('.product_carousel__img').prepend($('<div/>').attr('class',k).text(m));
+                } else {
+                    $(this).closest('.product_list__item,.carousel-item').find('.'+k).remove();
+                    $(this).removeClass(d).addClass(j);
+                }
+            });
+            $('.product__buy').each(function () {
+                if ( $.inArray($(this).data('product-id'),product_ids) !== -1 ) {
+                    $(this).addClass(d).removeClass(j);
+                    $('.'+f).remove();
+                    $('h1').after($('<div/>').attr('class','cart-popup__order_message '+f).text(m));
+                } else {
+                    $('.'+f).remove();
+                    $(this).removeClass(d).addClass(j);
+                }
+            });
+        },
+        createGiftModal: function(ps){
+            var d = '<div/>';
+            var m = $(d).attr({class:'modal fade modal-fullscreen-md-down',tabindex:-1,role:'dialog',id:'gift_modal','aria-labelledby':'gift_modal','aria-hidden':true})
+                .append($(d).attr({class:'modal-dialog modal-dialog-centered',role:'document'})
+                    .append($(d).attr({class:'modal-content'})
+                        .append($(d).attr({class:'model-head'})
+                            .append($('<button/>').attr({type:'button',class:'close','data-dismiss':'modal','aria-label':'Close'})
+                                .append($('<span/>').attr('aria-hidden',true).html('&times;'))))
+                        .append($(d).attr({class:'model-body'})
+                            .append($(d).attr('class','gift_modal__title').text('Выберите подарок'))
+                            .append($(d).attr('class','gift_modal__list')))));
+            for ( var i in ps ) {
+                var p = ps[i],
+                    $p = $(d).addClass('gift_modal__product')
+                        .append($('<img/>').attr({class:'gift_modal__product_img',src:p.url}))
+                        .append($(d).addClass('gift_modal__product_title').text(p.name))
+                        .append($('<a/>').attr({href:'#',class:'gift_modal__product_btn','data-code':p.code}).text('Выбрать'));
+                $('.gift_modal__list',m).append($p);
+            }
+            $body.append(m);
+        },
+        createPromoActivationModal: function (code,phone) {
+            if ( !$('#promo_activation_modal').length ) {
+                var d = '<div/>', b = '<button/>', s = '<span/>', i = '<input/>';
+                $body.append($(d).attr({tabindex: '-1', id: 'promo_activation_modal', class: 'modal fade common-dialog modal-auth'})
+                    .append($(d).attr('class', 'modal-dialog modal-dialog-centered')
+                        .append($(d).attr('class', 'modal-content')
+                            .append($(d).attr('class', 'modal-header')
+                                .append($(b).attr({type: 'button', 'data-dismiss': 'modal', 'aria-label': 'Close', class: 'close'})
+                                    .append($(s).attr('aria-hidden', true).html('&times;')))
+                                .append($('<h5/>').attr('class', 'modal-title').text('Активация промокода')))
+                            .append($(d).attr('class', 'modal-body')
+                                .append($('<form/>').attr({action: '/', class: 'auth-form js-ajax'})
+                                    .append($(i).attr({type: 'hidden', name: 'code'}).val(code))
+                                    .append($(d)
+                                        .append($(i).attr({type: 'text', name: 'phone', class: 'masked-input js-register-phone', required: 'required', placeholder: 'Введите телефон','data-ilonmask': 'mobile_phone'}).val(phone?phone:'+7')))
+                                    // .append($(d)
+                                    //     .append($('<p/>').attr('class', 'auth-form__comment').text('Нажимаю кнопку подтвердить, вы выражаете своё согласие на обработку персональных данных')))
+                                    .append($(d).attr('class', 'row')
+                                        .append($(d).attr('class', 'col-auto mt-3')
+                                            .append($(b).attr({class: 'btn btn-primary', type: 'submit'}).text('Подтвердить')))))))));
+                if ( phone ) {
+                    $('#promo_activation_modal .js-register-phone').attr('disabled','disabled');
+                }
+                $('#promo_activation_modal').on('hidden.bs.modal',function () {
+                    if ( $body.is('.no-gift-selected') ) {
+                        $('.js-cancel-promocode').trigger('click');
+                        $body.removeClass('no-gift-selected');
+                    }
+                    $('#promo_activation_modal,.modal-backdrop').remove();
+                }).on('show.bs.modal',function () {
+                    $body.addClass('no-gift-selected');
+                });
+                $('#promo_activation_modal .js-register-phone').mask('+7 (000) 000-00-00');
+                $('#promo_activation_modal .js-register-phone').keypress(function () {
+                    $(this).removeClass('is-invalid');
+                    $('#promo_activation_modal .cart-popup__order_message').remove();
+                });
+                $('#promo_activation_modal form').submit(function () {
+                    var phone = $('.js-register-phone',this).val();
+
+                    $('#promo_activation_modal .js-register-phone').removeClass('is-invalid');
+                    $('#promo_activation_modal .cart-popup__order_message').remove();
+
+                    $.ri.api.foApplyPromocode(code,phone,function (r) {
+                        $.ri.lib.logResponse(r);
+                        if ( r.status === 'ok' ) {
+                            typeof ym == 'function' && ym(ym_id,'reachGoal','gotopromocartsuc');
+                            console.log('gotopromocartsuc');
+
+                            $('#promo_activation_modal,.modal-backdrop').remove();
+                            setTotalCart(r.data.total, r.data.total_with_discount);
+                            if ( r.data.parts.length ) {
+                                var gm ='#gift_modal';
+                                $(gm+',.modal-backdrop').remove();
+                                $.ri.lib.createGiftModal(r.data.parts);
+                                $(gm).on('hidden.bs.modal',function () {
+                                    if ( $body.is('.no-gift-selected') ) {
+                                        $('.js-cancel-promocode').trigger('click');
+                                        $body.removeClass('no-gift-selected');
+                                    }
+                                }).on('show.bs.modal',function () {
+                                    $body.addClass('no-gift-selected');
+                                });
+                                $(gm).modal('show');
+                            }
+                        } else {
+                            var f = r.errors[0][1].code, $p = $('#promo_activation_modal .js-register-phone');
+                            if ( f == 'customer_phone_number' ) {
+                                $p.addClass('is-invalid');
+                                $p.closest('div').after($('<div/>').addClass('cart-popup__order_message').text('Некорректный номер телефона'));
+                            } else if ( f == 'order_count' ) {
+                                $p.closest('div').after($('<div/>').addClass('cart-popup__order_message').text('Простите, промокод действует только на первый заказ'));
+                            } else {
+                                $p.closest('div').after($('<div/>').addClass('cart-popup__order_message').text('Простите, условия использования промокода не соблюдены'));
+                            }
+                        }
+                    });
+                });
+            }
+        }
+    };
+
+    $.ri.delivery = {
+        map: {},
+        myPlacemark: {},
+        prev_address: '',
+        input: {},
+        pmaiv: '',
+        initial_address: '',
+        m: 'pick_modal__map_marker',
+        ok: {},
+        okm: {},
+        init: function () {
+            var t = this;
+
+            t.input = $('.pick_modal__address_input');
+            t.ok = $('.pick_modal__ok_btn');
+            t.okm = $('.pick_modal__ok_btn--mobile');
+            t.pmaiv = t.input.val();
+
+            $('#pick_modal').on('shown.bs.modal', function (e) {
+                var $a = $(e.relatedTarget);
+                t.initial_address = $a.is('.personal_info__address_input--selected') ? $a.text() : '';
+                console.log(t.initial_address);
+                if ( t.initial_address ) {
+                    t.setAddress(t.initial_address);
+                    t.okm.removeClass('pick_modal__ok_btn--disabled');
+                } else {
+
+                    t.okm.addClass('pick_modal__ok_btn--disabled');
+                }
+                $('.pick_modal__warning').hide();
+                //console.log(111);
+                $('.cart-popup__order_message_w--b').remove();
+                $.isEmptyObject(t.map) && ymaps.ready(t.initMap,function () { },$.ri.delivery);
+                $('#'+t.m).show();
+            }).on('hide.bs.modal', function () {
+                $('#'+t.m).remove();
+                ymaps.ready(function() {
+                    t.map.destroy();
+                    t.map = false;
+                });
+            });
+
+            t.input.keyup(function () {
+                var address = $(this).val();
+                if ( address.length > 3 && address.length > t.prev_address.length ) {
+                    t.prev_address = address;
+                    $.ri.api.dadataSuggest(address,function (r) {
+                        $.ri.lib.logResponse(r);
+                        if ( r.status === 'ok' ) {
+                            var s = $('.pick_modal__address_list');
+                            $('li',s).remove();
+                            for ( var id in r.data ) {
+                                s.append($('<li/>').data('id',id).attr('data-id',id).text(r.data[id]));
+                            }
+                            s.addClass('pick_modal__address_list--active');
+                            $('#'+t.m).hide();
+                        }
+                    });
+                } else {
+                    $('.pick_modal__address_list').removeClass('pick_modal__address_list--active');
+                }
+
+                if ( address.length < t.prev_address.length  ) {
+
+                    t.ok.data('location_id','').addClass('pick_modal__ok_btn--disabled');
+                    t.prev_address = address;
+                }
+            });
+            $('.pick_modal__address_list').on('click','li',function () {
+                t.setAddress($(this).text());
+                t.input.data('data_id',$(this).data('id'));
+                $('.pick_modal__address_list').removeClass('pick_modal__address_list--active');
+                $('#'+t.m).show();
+                t.checkLocation();
+                $.ri.api.dadataPosition($(this).data('id'),function (r) {
+                    $.ri.lib.logResponse(r);
+                    if ( r.status === 'ok' ) {
+                        t.map.setCenter([r.data.latitude,r.data.longitude]).then(function () {
+                            t.map.setZoom(16,{ duration: 500 });
+                        });
+                    }
+                });
+            });
+            $('.pick_modal__pickme_btn').click(t.getLocation);
+            t.ok.click(function () {
+                var l = $(this).data('location_id');
+                if ( l ) {
+                    $.ri.api.customerSetLocation(l,function (r) {
+                        $.ri.lib.logResponse(r);
+                        if ( r.status === 'ok' ) {
+                            $('#ptime').text(r.data.delivery_time);
+                            $('#pcheck').text(r.data.min_sum);
+                            $('#personal_info__shipping_delivery').text(r.data.address).addClass('personal_info__address_input--selected');
+                            $('#pick_modal .close').trigger('click');
+                            $.ri.api.foStoplist(l,function (r) {
+                                $.ri.lib.logResponse(r);
+                                if ( r.status === 'ok' ) {
+                                    $.ri.lib.applyStopList(r.data);
+                                }
+                            });
+                            var sid = $body.data('sku-id');
+                            if ( sid ) {
+                                var mode = $body.data('mode');
+                                if ( mode === 'choose_modificators' ) {
+                                    $('#modificators-modal').modal('show');
+                                    $body.data('sku-id','').data('mode','');
+                                } else if ( mode === 'add_without_modificators' ) {
+                                    addToCart(sid);
+                                }
+                            }
+                            $body.data('shipping',1).attr('data-shipping',1);
+                        } else {
+                            t.ok.addClass('pick_modal__ok_btn--disabled').data('location_id','');
+                        }
+                    });
+                } else {
+                    
+                    t.ok.addClass('pick_modal__ok_btn--disabled');
+                }
+                return false;
+            });
+        },
+        initMap: function () {
+            var t = this;
+            $.ri.api.customerGetMapCenter(function (r) {
+                $.ri.lib.logResponse(r);
+                //console.log(r.status);
+                if ( r.status === 'ok' ) {
+                    t.map = new ymaps.Map('pick_modal__map', {
+                        center: r.data,
+                        zoom: 10,
+                        controls: []
+                    }, { suppressMapOpenBlock: true });
+                    t.addMarker();
+                    t.map.events.add('actionend', function () {
+                        var gp = t.map.getCenter(), z = t.map.getZoom();
+                        $('.pick_modal__warning').hide();
+                        $('.cart-popup__order_message_w--b').remove();
+                        // if ( z > 15 ) {
+                        $('.pick_modal__address_list li').remove();
+                        $('.pick_modal__address_list').addClass('pick_modal__address_list--active');
+                        t.getAddressByCoords(gp[0],gp[1]);
+                        // }
+                    });
+                }
+            });
+        },
+        addMarker: function () {
+            var t = this;
+            if ( !$(t.m).length ) {
+                $body.prepend($('<div/>').attr('id',t.m));
+            }
+        },
+        checkLocation: function () {
+            var t = this;
+            console.log(t);
+            if ( t.input.data('data_id') ) {
+                $.ri.api.foLocation(t.input.data('data_id'),function (r) {
+                    $.ri.lib.logResponse(r);
+
+                    if ( r.status === 'ok' ) {
+                        var c = 'pick_modal__ok_btn--disabled', $w = $('.pick_modal__warning'), i = 1*r.data, j = i<0?-i:i;
+                        if ( i !== 0 ) {
+                            t.ok.data('location_id',j).attr('data-location_id',j);
+                            t.ok.removeClass(c);
+                            $w.hide();
+                            if ( i < 0 ) {
+                                var b = 'cart-popup__order_message--b', w='cart-popup__order_message_w--b', p = '#pick_modal';
+                                $(p+' .'+w).remove();
+                                $(p+' .modal-body').append($('<div/>').addClass(w).append($('<div/>').addClass(b).text('Сейчас наши повара отдыхают. Вы можете получить ваш заказ позже.')));
+                            }
+                        } else {
+                            t.ok.data('location_id','');
+                            t.ok.addClass(c);
+                            $w.show();
+                        }
+                    } else {
+                        t.ok.data('location_id','');
+                        t.ok.addClass(c);
+                        $w.show();
+                    }
+                });
+            }
+        },
+        getLocation: function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition($.ri.delivery.showPosition);
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+            }
+        },
+        showPosition: function (position) {
+            var t = $.ri.delivery;
+            t.map.setCenter([position.coords.latitude,position.coords.longitude]).then(function () {
+                t.map.setZoom(16,{ duration: 500 });
+                getAddressByCoords(position.coords.latitude,position.coords.longitude);
+            });
+        },
+        getAddressByCoords: function (latitude,longitude) {
+            var t = this;
+            $.ri.api.dadataAddress(latitude,longitude,function (r) {
+                $.ri.lib.logResponse(r);
+                if ( r.status === 'ok' ) {
+                    for (var id in r.data) {
+                        // t.input.val(r.data[id]);
+                        // $('.pick_modal__address_text').html(r.data[id]);
+                        // t.prev_address = r.data[id];
+                        t.setAddress(r.data[id]);
+                        t.input.data('data_id',id).attr('data-data_id',id);
+                    }
+                } else {
+                    // t.input.val(t.pmaiv);
+                    // t.prev_address = '';
+                    t.input.data('data_id','').removeAttr('data-data_id');
+                }
+                t.checkLocation();
+            });
+        },
+        setAddress: function(a) {
+            var t = this, p = 'pick_modal__address_text', $x = $('.'+p), v = p+'--active';
+            t.input.val(a?a:t.pmaiv);
+            if ( a ) {
+                $x.addClass(v).html(a);
+            } else {
+                $x.removeClass(v).html('');
+            }
+            t.prev_address = a;
+        }
+    };
+
+    $.ri.delivery.init();
+
+    $.ri.takeaway = {
+        map: {},
+        myPlacemark: {},
+        prev_address: '',
+        input: {},
+        pmaiv: '',
+        $dmal: {},
+        restaurants: [],
+        placemark: [],
+        work_hours_key: '',
+        init: function () {
+            var t = this, d = 'delivery_modal__tab', li = $('.'+d+' li');
+
+            t.$dmal = $('.delivery_modal__address_list');
+            t.input = $('.delivery_modal__address_input');
+
+            t.input.focus(function () {
+                var data_id = t.input.data('data_id');
+                if ( !data_id ) {
+                    $(this).val('');
+                }
+            });
+
+            li.click(function () {
+                li.removeClass(d+'--selected');
+                $(this).addClass(d+'--selected');
+                $('.'+d+'_content').hide();
+                $($(this).data('target')).show();
+            });
+
+            $('#delivery_modal').on('shown.bs.modal', function () {
+                if ( !t.restaurants.length ) {
+                    $.ri.api.restaurantsGet(function (r) {
+                        $.ri.lib.logResponse(r);
+                        if ( r.status === 'ok' ) {
+                            t.restaurants = r.data;
+                            t.checkMap()
+                        }
+                    });
+                } else {
+                    t.checkMap()
+                }
+            }).on('hide.bs.modal', function () {
+                ymaps.ready(function() {
+                    t.map.destroy();
+                    t.map = false;
+                });
+            });
+
+            t.input.keyup(function () {
+                var address = $(this).val();
+                if ( address.length > 3 && address.length > t.prev_address.length ) {
+                    t.prev_address = address;
+                    $.ri.api.dadataSuggest(address,function (r) {
+                        $.ri.lib.logResponse(r);
+                        if ( r.status === 'ok' ) {
+                            $('li',t.$dmal).remove();
+                            for ( var id in r.data ) {
+                                t.$dmal.append($('<li/>').data('id',id).attr('data-id',id).text(r.data[id]));
+                            }
+                            t.$dmal.addClass('pick_modal__address_list--active');
+                        }
+                    });
+                }
+                if ( address.length < t.prev_address.length  ) {
+                    t.prev_address = address;
+                }
+            });
+
+            t.$dmal.on('click','li',function () {
+                t.input.val($(this).text());
+                t.prev_address = $(this).text();
+                t.input.data('data_id',$(this).data('id'));
+                t.$dmal.removeClass('pick_modal__address_list--active');
+                $.ri.api.dadataPosition($(this).data('id'),function (r) {
+                    $.ri.lib.logResponse(r);
+                    if ( r.status === 'ok' ) {
+                        t.map.setCenter([r.data.latitude,r.data.longitude]).then(function () {
+                            t.map.setZoom(16,{ duration: 500 });
+                            t.addPlacemark();
+                        });
+                    }
+                });
+            });
+
+            $('.delivery_modal__pickme_btn').click(t.getLocation);
+        },
+        checkMap: function() {
+            $.isEmptyObject(this.map) && ymaps.ready(this.initMap,function () { },$.ri.takeaway);
+        },
+        initMap: function () {
+            var t = this;
+            $.ri.api.customerGetRestaurantsCenter(function (r) {
+                if ( r.status === 'ok' ) {
+                    t.map = new ymaps.Map('delivery_modal__map', {
+                        center: r.data,
+                        zoom: 10,
+                        controls: []
+                    }, {  });
+                    console.log(t);
+                    $('#delivery_modal__list').html('').append(t.createList()).on('click','li',function () {
+                        var id = $(this).data('id'),
+                            point = $(this).data('point');
+                        t.map.setCenter(point).then(function () {
+                            t.map.setZoom(14,{ duration: 500 });
+                            t.placemark[id].balloon.open(t.map.getCenter());
+                        });
+                        $('.delivery_modal__tab li:first-child').trigger('click');
+                        return false;
+                    });
+
+                    $('#delivery_modal__map').on('click','.restaurants__reservation_btn',function () {
+                        var id = $(this).data('id');
+                        $.ri.api.customerSetTakeaway(id,function (r) {
+                            $.ri.lib.logResponse(r);
+                            if ( r.status === 'ok' ) {
+                                $('#personal_info__shipping_pick').text(r.data.RestaurantNameRu).addClass('personal_info__address_input--selected');
+                                $('#delivery_modal .close').trigger('click');
+                                $.ri.api.foStoplistCode(r.data.DeliveryId,function (r) {
+                                    $.ri.lib.logResponse(r);
+                                    if ( r.status === 'ok' ) {
+                                        $.ri.lib.applyStopList(r.data);
+                                    }
+                                    var sid = $body.data('sku-id');
+                                    if ( sid ) {
+                                        var mode = $body.data('mode');
+                                        if ( mode === 'choose_modificators' ) {
+                                            $('#modificators-modal').modal('show');
+                                            $body.data('sku-id','').data('mode','');
+                                        } else if ( mode === 'add_without_modificators' ) {
+                                            addToCart(sid);
+                                        }
+                                    }
+                                    $body.data('shipping',2).attr('data-shipping',2);
+                                });
+                            }
+                        });
+                        return false;
+                    });
+                }
+            });
+        },
+        createList: function () {
+            var a = ['BrandName','AddressLine2Ru','RestaurantNameRu'], s = '',
+                w = this.work_hours_key, $m = $('<img/>').attr('src','/wa-apps/shop/themes/ilpatio/img/svg/metro.svg'),
+                ul = $('<ul/>').addClass('delivery_modal__list');
+            for ( t in this.restaurants ) {
+                var r = this.restaurants[t];
+                if ( r.hasOwnProperty('StatusId') && r.StatusId === 1 ) {
+                    var body = $('<div/>').addClass('restaurants__balloon'),
+                        li = $('<li/>').data('id',t).data('point',[r.Lat, r.Lng]);
+                    for ( var i in a ) {
+                        s = a[i];
+                        r.hasOwnProperty(s) && r[s] && body.append($('<div/>').addClass('restaurants__list_'+s).text(r[s]));
+                    }
+                    if ( r.hasOwnProperty('available') ) {
+                        if ( r.available ) {
+                            r.hasOwnProperty('Phone') && r.Phone && body.append($('<div/>').addClass('restaurants__list_Phone').append($('<a/>').attr('href','tel:'+r.Phone).text(r.Phone)));
+                            r.hasOwnProperty('MetroNameRu') && r.MetroNameRu && body.append($('<div/>').addClass('restaurants__list_MetroNameRu').append($m.clone()).append($('<span/>').text(r.MetroNameRu)));
+                            r.hasOwnProperty(w) && r[w] && body.append($('<div/>').addClass('restaurants__workhours').append($('<span/>').addClass('restaurants__workhours_title').text('Режим работы')).append($('<span/>').addClass('restaurants__workhours_h').text(r[w])));
+                        } else {
+                            body.append($('<div/>').addClass('cart-popup__order_message--b').text('Сейчас наши повара отдыхают. Вы можете получить ваш заказ позже.'));
+                        }
+                    }
+                    body.append($('<div/>').addClass('restaurants__controls').append($('<a/>').data('id',r.Id).attr('data-id',r.Id).attr('href','#').addClass('restaurants__reservation_btn').text('Выбрать ресторан')));
+
+                    this.placemark[t] = new ymaps.Placemark([r.Lat, r.Lng], {
+                        balloonContentHeader: '',
+                        balloonContentBody: body[0].outerHTML,
+                        balloonContentFooter: ''
+                    },{
+                        iconLayout: 'default#image',
+                        iconImageHref: '/wa-apps/shop/themes/ilpatio/img/mapmark.png',
+                        iconImageSize: [28, 32],
+                        iconImageOffset: [-14, -32]
+                    });
+                    this.map.geoObjects.add(this.placemark[t]);
+
+                    r.hasOwnProperty('MetroNameRu') && r.MetroNameRu && li.append($('<div/>').addClass('restaurants__list_MetroNameRu').append($m.clone()).append($('<span/>').text(r.MetroNameRu)));
+                    r.hasOwnProperty('AddressLine2Ru') && r.AddressLine2Ru && li.append($('<div/>').addClass('delivery_modal__list_item_text').text(r.AddressLine2Ru));
+                    r.hasOwnProperty('RestaurantNameRu') && r.RestaurantNameRu && li.append($('<div/>').addClass('delivery_modal__list_item_text').text(r.RestaurantNameRu));
+                    r.hasOwnProperty(w) && r[w] && li.append($('<div/>').addClass('delivery_modal__workhours').text(r[w]));
+                    ul.append(li);
+                }
+
+            }
+            return ul;
+        },
+        getAddressByCoords: function (latitude,longitude) {
+            var t = this;
+            $.ri.api.dadataAddress(latitude,longitude,function (r) {
+                $.ri.lib.logResponse(r);
+                if ( r.status === 'ok' ) {
+                    for (var id in r.data) {
+                        t.input.val(r.data[id]);
+                        t.prev_address = r.data[id];
+                        t.input.data('data_id',id).attr('data-data_id',id);
+                    }
+                } else {
+                    t.input.val(pmaiv);
+                    t.prev_address = '';
+                    t.input.data('data_id','').removeAttr('data-data_id');
+                }
+            });
+        },
+        getLocation: function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(this.showPosition);
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+            }
+        },
+        showPosition: function (position) {
+            var t = this;
+            t.map.setCenter([position.coords.latitude,position.coords.longitude]).then(function () {
+                t.map.setZoom(16,{ duration: 500 });
+                t.addPlacemark();
+                t.getAddressByCoords(position.coords.latitude,position.coords.longitude);
+            });
+        }
+    };
+
+    $.ri.takeaway.init();
+});

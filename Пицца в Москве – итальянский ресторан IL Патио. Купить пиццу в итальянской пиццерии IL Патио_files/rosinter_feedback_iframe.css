@@ -1,0 +1,201 @@
+@font-face {
+    font-family: 'MyriadPro';
+    src: url('../fonts/MyriadProRegular.eot');
+    src: url('../fonts/MyriadProRegular.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/MyriadProRegular.woff') format('woff'),
+         url('../fonts/MyriadProRegular.ttf') format('truetype'),
+         url('../fonts/MyriadProRegular.svg#MyriadProRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+	color: #787878;
+    font-family: MyriadPro,Arial,sans;
+	background-color: #EFEFEF;
+    padding: 0;
+	margin: 0;
+}
+
+a, a:hover, a:active, a:link, a:visited {
+	outline: none;
+}
+
+#rf_form {
+    width: 795px;
+	padding: 0;
+	margin: 0;
+}
+
+#rf_main_table {
+	width: 100%;
+	border-collapse: collapse;
+	padding: 0;
+	margin: 0;
+}
+
+#rf_main_table td {
+	vertical-align: top;
+	padding: 0;
+}
+
+#rf_main_table .rf_first_column {
+	width: 428px;
+}
+
+#rf_form h3 {
+	color: #333333;
+    font: bold 14px/16px MyriadPro, sans-serif;
+    margin: 0 0 10px 0;
+}
+
+#rf_form h4 {
+	color: #787878;
+    font: normal 14px/16px MyriadPro, sans-serif;
+    margin: 10px 0;
+}
+
+#rf_form h3 span, #rf_form h4 span {
+	color: #ff0000;
+}
+
+#rf_form .rf_text_field_small {
+	font: 12px/14px MyriadPro,sans-serif;
+	color: #787878;
+}
+
+#rf_form .rf_listing {
+	display: block;
+	padding: 0;
+	margin: 10px 0;
+}
+
+#rf_form .rf_listing li {
+	height:  18px;
+	display: block;
+	padding: 0;
+	margin: 0 0 8px 0;	
+}
+#rf_form .rf_listing_two_cols li {
+	width: 49%;
+	float: left;
+}
+
+#rf_form .rf_listing li a {
+	height: 18px;
+	display: inline-block;  
+	color: #787878;  
+	border: none;   
+	text-decoration: none;  
+	font: 14px/18px MyriadPro, Arial, sans;  		
+	background: transparent url(../img/checkboxBg.png) no-repeat 0 -38px;  
+	padding: 0 0 0 25px;   
+	margin: 0;   
+}
+
+#rf_form .rf_listing li a:hover {
+	background-position: 0 -19px;
+}
+
+#rf_form .rf_listing li a.active {
+	background-position: 0 0;
+}
+
+#rf_form .rf_cusel {
+	width: 365px;
+}
+
+#rf_form .rf_text_field {
+    width: 370px;
+    height: 29px;
+    color: #505050;
+	border: 1px solid #D1D1D1;
+    font: 14px/29px MyriadPro,sans-serif;
+    padding: 0 8px;
+}
+#rf_form #rf_date_field {
+	width: 84px;
+}
+
+#rf_form .rf_textarea_field {
+	width: 372px;
+	height: 66px;
+	color: #333333;
+	border: 1px solid #D1D1D1;
+	font: normal 14px/18px MyriadPro, sans-serif;
+	padding: 7px;
+}
+
+#rf_form #rf_submit {
+	display: block;
+	width: 131px;  
+	height: 33px;
+	border: none;
+	outline: none;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-position: 0 0;	  
+	line-height: 30px;
+	margin: 20px 0 10px 0;
+	cursor: pointer;
+}
+#rf_form .rf_submit_ru { background-image: url(../img/send_ru.png); }
+#rf_form .rf_submit_en { background-image: url(../img/send_en.png); width: 67px; }
+#rf_form .rf_submit_lv { background-image: url(../img/send_lv.png); width: 74px; }
+#rf_form .rf_submit_hu { background-image: url(../img/send_hu.png); width: 70px; }
+#rf_form .rf_submit_cz { background-image: url(../img/send_cz.png); width: 67px; }
+#rf_form .rf_submit_pl { background-image: url(../img/send_pl.png); width: 72px; }
+
+#rf_form #rf_main_table .rf_submit_hover {
+	outline: none;
+	background-position: 0 -35px;
+}
+#rf_form #rf_main_table .rf_submit_down {
+	outline: none;
+	background-position: 0 -70px !important;
+}
+
+#rf_form small {
+	font: normal 12px MyriadPro, sans-serif;
+}
+#rf_form small span {
+	color: #ff0000;
+	font-size: 14px;
+	padding: 0 3px;
+}
+
+#rf_wrap_date {
+	height: 32px;
+}
+
+#rf_wrap_day, #rf_form #rf_date_day {
+	width: 72px;
+}
+#rf_wrap_day {
+	float: left;
+}
+#rf_wrap_month, #rf_form #rf_date_month {
+	width: 72px;
+}
+#rf_wrap_month {
+	float: left;
+	margin: 0 10px;
+}
+#rf_wrap_year, #rf_form #rf_date_year {
+	width: 88px;
+}
+#rf_wrap_year {
+	float: left;
+}
+
+#rf_message {
+	width: 80%;
+	margin: 0 auto;
+}
+
+#rf_message td {
+	height: 380px;
+	color: #333;
+	text-align: center;
+	vertical-align: middle;
+}

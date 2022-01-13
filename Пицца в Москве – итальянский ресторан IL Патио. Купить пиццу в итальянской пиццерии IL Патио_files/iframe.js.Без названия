@@ -1,0 +1,311 @@
+(function($){
+
+
+	// set visit type:
+	window.setVisitType = function(id, secondTime)
+	{
+		// формирование тем
+		if(jsondata.themes && jsondata.themes.length) 
+		{
+			$('#rf_wrap_themes').html(
+				'<select name="theme" id="rf_theme_field" class="rf_cusel rf_sel_theme">' +
+					'<option value="0">' + $('#rf_wrap_themes').attr('rel') + '</option>' +
+				'</select>'
+			);
+			for(var i = 0; i < jsondata.themes.length; i++) 
+			{
+				// if theme is 1:
+				if (jsondata.themes[i]['parent_id'] == id)
+				{
+					$('#rf_theme_field').append('<option value="' + jsondata.themes[i]['id'] + '">' + jsondata.themes[i]['title'] + '</option>');
+				}
+			}
+
+			if (secondTime)
+			{
+				// кастомизированные селекты
+				cuSel({
+					visRows: 15,                           
+					changedEl: '.rf_sel_theme',    
+					scrollArrows: true  
+				}); 
+			}
+		}
+	};
+	
+	$(document).ready(function() {
+		
+		// проверка подгрузки данных
+		if(!window.jsondata) {
+			alert('При загрузке данных произошла ошибка!');
+			$('#rf_form').remove();
+			return false;
+		}
+		
+		// формирование типов сообщения
+		if(jsondata.types && jsondata.types.length) {
+			$('#rf_wrap_types').html('<ul id="rf_types" class="rf_listing"></ul>');
+			
+			for(var i = 0; i < jsondata.types.length; i++) {
+				$('#rf_types').append('<li><a href="javascript:void(0);" rel="type:' + jsondata.types[i]['id'] + '">' + jsondata.types[i]['title'] + '</a></li>');
+				if(i == 0) {
+					$('#rf_types li:last a').addClass('active');
+					$('#rf_type_field').val(/^[a-z]+\:([0-9]+)$/.exec($('#rf_types li:last a').attr('rel'))[1]);
+				}
+			}
+		}
+
+		// visits:
+		if(jsondata.visits && jsondata.visits.length) {
+			$('#rf_wrap_visits').html('<ul id="rf_visits" class="rf_listing rf_listing_two_cols"></ul>');
+			
+			for(var i = 0; i < jsondata.visits.length; i++) {
+				$('#rf_visits').append('<li><a class="visit_li_item" href="javascript:window.setVisitType(\'' + jsondata.visits[i]['id'] + '\', true)" rel="visit:' + jsondata.visits[i]['id'] + '">' + jsondata.visits[i]['title'] + '</a></li>');
+				if(i == 0) {
+					$('#rf_visits li:last a').addClass('active');
+					$('#rf_visit_field').val(/^[a-z]+\:([0-9]+)$/.exec($('#rf_visits li:last a').attr('rel'))[1]);
+				}
+			}
+		}
+
+		// формирование тем
+		if(jsondata.themes && jsondata.themes.length) {
+			window.setVisitType(1, false);
+		}
+		
+		// подгрузка списка брендов
+		if($('#rf_wrap_brand').length) {
+			$('#rf_wrap_brand').html(
+				'<select name="brand_id" id="rf_brand_field" class="rf_cusel">' +
+					'<option value="0">' + $('#rf_wrap_brand').attr('rel') + '</option>' +
+				'</select>'
+			);
+			if(jsondata.brands && jsondata.brands.length) {
+				for(var i = 0; i < jsondata.brands.length; i++) {
+					$('#rf_brand_field').append('<option value="' + jsondata.brands[i]['id'] + '">' + jsondata.brands[i]['title'] + '</option>');
+				}
+			}
+		}
+		
+		var brand_id = $('#rf_brand_field').val();
+		
+		// подгрузка списка городов
+		$('#rf_wrap_city').html(
+			'<select name="city_id" id="rf_city_field" class="rf_cusel" '+ (brand_id == 0 ? ' disabled="disabled"' : '') +'>' +
+				'<option value="0">' + $('#rf_wrap_city').attr('rel') + '</option>' +
+			'</select>'
+		);
+		if(jsondata.cities && jsondata.cities.length) {
+			for(var i = 0; i < jsondata.cities.length; i++) {
+				if(brand_id == 0) {
+					$('#rf_city_field').append('<option value="' + jsondata.cities[i]['id'] + '">' + jsondata.cities[i]['title'] + '</option>');
+				} else if(jsondata.cities[i].brands_list && jsondata.cities[i].brands_list.length) {
+					for(var j = 0; j < jsondata.cities[i].brands_list.length; j++) {
+						if(jsondata.cities[i].brands_list[j] == brand_id) {
+							$('#rf_city_field').append('<option value="' + jsondata.cities[i]['id'] + '">' + jsondata.cities[i]['title'] + '</option>');
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		// подгрузка списка ресторанов
+		$('#rf_wrap_restaurant').html(
+			'<select name="restaurants" id="rf_restaurant_field" class="rf_cusel" disabled="disabled">' +
+				'<option value="0">' + $('#rf_wrap_restaurant').attr('rel') + '</option>' +
+			'</select>'
+		);
+		if(jsondata.restaurants && jsondata.restaurants.length) {
+			for(var i = 0; i < jsondata.restaurants.length; i++) {
+				$('#rf_restaurant_field').append('<option value="' + jsondata.restaurants[i]['id'] + '">' + jsondata.restaurants[i]['title'] + '</option>');
+			}
+		}
+		
+		// дата посещения
+		var currentDay		=  new Date().getDate();
+		var currentMonth	= (new Date().getMonth() + 1);
+		var currentYear		=  new Date().getYear();
+		if(currentYear < 2000) currentYear += 1900;
+		var finishYear = currentYear - 5;
+		
+		$('#rf_wrap_day').html('<select name="date[d]" id="rf_date_day" class="rf_cusel"></select>');
+		$('#rf_wrap_month').html('<select name="date[m]" id="rf_date_month" class="rf_cusel"></select>');
+		$('#rf_wrap_year').html('<select name="date[y]" id="rf_date_year" class="rf_cusel"></select>');
+		for(var i = 1; i <= 31; i++) {
+			$('#rf_date_day').append('<option value="' + i + '"' + (currentDay == i ? ' selected="selected"' : '') + '>' + (i < 10 ? '0'+i : i) + '</option>');
+		}
+		for(var i = 1; i <= 12; i++) {
+			$('#rf_date_month').append('<option value="' + i + '"' + (currentMonth == i ? ' selected="selected"' : '') + '>' + (i < 10 ? '0'+i : i) + '</option>');
+		}
+		
+		for(var i = currentYear; i >= finishYear; i--) {
+			$('#rf_date_year').append('<option value="' + i + '"' + (currentYear == i ? ' selected="selected"' : '') + '>' + i + '</option>');
+		}
+		
+		// кастомизированные селекты
+		cuSel({
+			visRows: 15,                           
+			changedEl: '.rf_cusel',    
+			scrollArrows: true  
+		}); 
+		
+		// инициализируем календарь
+		$('#rf_date_field').live('click', function() {  				
+			$(this).datepicker({
+				regional: 'ru',
+				dateFormat: 'dd.mm.yy',
+				onChangeMonthYear: function() { 
+					setTimeout('rosinter_customDatapicker()', 20);  
+				}
+			});     					
+			$(this).focus();  
+			rosinter_customDatapicker();
+		});
+		
+		$('#rf_submit')
+			.hover(function() {
+				$(this).addClass('rf_submit_hover');
+			}, function() {
+				$(this).removeClass('rf_submit_hover');
+				$(this).removeClass('rf_submit_down');
+			})
+			.mousedown(function() {
+				$(this).addClass('rf_submit_down');
+			})
+			.mouseup(function() {
+				$(this).removeClass('rf_submit_down');
+			});
+		
+		// валидация формы
+		$('#rf_form').submit(function() {
+			
+			var check = true;
+			var email_regexp = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+			// if not specified theme:
+			if ($("#rf_theme_field").val() == "0")
+			{
+				alert("Пожалуйста, выберите тему обращения");
+				return false;
+			}
+			
+			$('#rf_form .validate').each(function() {
+				if($.trim($(this).val()) == '' || $(this).val() == 0) {
+					check = false;
+					alert($(this).attr('rel'));				    
+					return false;
+				}
+			}); 
+
+
+			
+			if(!check) return false;
+			
+			if(!email_regexp.test($.trim($('#rf_email_field').val()))) {
+				alert('E-mail введен некорректно!');  
+				return false;
+			}
+			
+			return true;
+		});
+		
+	});
+	
+	// хаки перегрузки календаря
+	rosinter_customDatapicker = function() {
+		$('.ui-datepicker-calendar').find('tr').not(':first').each(function() {							    
+			$(this).find('td:first').addClass('firstTd');
+			$(this).find('td:last').addClass('lastTd');  				
+		});
+		$('.ui-datepicker-calendar tr:last').addClass('lastTr');    
+	}
+	
+	// кастомизированные чекбоксы
+	$('.rf_listing a').live('click', function() {
+		$(this).parents('ul').find('.active').removeClass('active');
+		$(this).addClass('active');
+		
+		if(/^([a-z]+)\:([0-9]+)$/.test($(this).attr('rel'))) {
+			var data = /^([a-z]+)\:([0-9]+)$/.exec($(this).attr('rel'));
+			$('#rf_'+data[1]+'_field').val(data[2]);
+		}
+	});
+	
+	// выбираем бренд
+	$('#rf_brand_field').live('change', function() {
+		
+		var brand_id	= $(this).val();
+		
+		// подгрузка списка городов
+		$('#rf_wrap_city').html(
+			'<select name="city_id" id="rf_city_field" class="rf_cusel"'+ (brand_id == 0 ? ' disabled="disabled"' : '') +'>' +
+				'<option value="0">' + $('#rf_wrap_city').attr('rel') + '</option>' +
+			'</select>'
+		);
+		if(jsondata.cities && jsondata.cities.length) {
+			for(var i = 0; i < jsondata.cities.length; i++) {
+				if(brand_id == 0) {
+					$('#rf_city_field').append('<option value="' + jsondata.cities[i]['id'] + '">' + jsondata.cities[i]['title'] + '</option>');
+				} else if(jsondata.cities[i].brands_list && jsondata.cities[i].brands_list.length) {
+					for(var j = 0; j < jsondata.cities[i].brands_list.length; j++) {
+						if(jsondata.cities[i].brands_list[j] == brand_id) {
+							$('#rf_city_field').append('<option value="' + jsondata.cities[i]['id'] + '">' + jsondata.cities[i]['title'] + '</option>');
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		// подгрузка списка ресторанов
+		$('#rf_wrap_restaurant').html(
+			'<select name="restaurants" id="rf_restaurant_field" class="rf_cusel" disabled="disabled">' +
+				'<option value="0">' + $('#rf_wrap_restaurant').attr('rel') + '</option>' +
+			'</select>'
+		);
+		if(jsondata.restaurants && jsondata.restaurants.length) {
+			for(var i = 0; i < jsondata.restaurants.length; i++) {
+				if(brand_id == 0 || brand_id == jsondata.restaurants[i]['brand_id']) {
+					$('#rf_restaurant_field').append('<option value="' + jsondata.restaurants[i]['id'] + '">' + jsondata.restaurants[i]['title'] + '</option>');
+				}
+			}
+		}
+		
+		// кастомизированные селекты
+		cuSel({
+			visRows: 20,                           
+			changedEl: '#rf_city_field, #rf_restaurant_field',    
+			scrollArrows: true  
+		}); 
+	});	
+
+	// выбираем город
+	$('#rf_city_field').live('change', function() {
+		
+		var brand_id	= $('#rf_brand_field').val();
+		var city_id		= $(this).val();
+		
+		// подгрузка списка ресторанов
+		$('#rf_wrap_restaurant').html(
+			'<select name="restaurants" id="rf_restaurant_field" class="rf_cusel"'+ (brand_id == 0 ? ' disabled="disabled"' : '') +'>' +
+				'<option value="0">' + $('#rf_wrap_restaurant').attr('rel') + '</option>' +
+			'</select>'
+		);
+		if(jsondata.restaurants && jsondata.restaurants.length) {
+			for(var i = 0; i < jsondata.restaurants.length; i++) {
+				if((brand_id == 0 || brand_id == jsondata.restaurants[i]['brand_id']) && (city_id == 0 || city_id == jsondata.restaurants[i]['city_id'])) {
+					$('#rf_restaurant_field').append('<option value="' + jsondata.restaurants[i]['id'] + '">' + jsondata.restaurants[i]['title'] + '</option>');
+				}
+			}
+		}
+		
+		// кастомизированные селекты
+		cuSel({
+			visRows: 20,                           
+			changedEl: '#rf_restaurant_field',    
+			scrollArrows: true  
+		}); 
+	});	
+	
+})(jQuery)
